@@ -28,7 +28,7 @@ jobs:
         working-directory: flutter_app
 
       - name: 编译 Release APK
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --split-per-abi 2>&1
         working-directory: flutter_app
 
       - name: 上传 APK

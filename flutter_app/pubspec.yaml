@@ -18,7 +18,7 @@ dependencies:
   sqflite: ^2.3.0
   path: ^1.9.0
   # 本地加密存储（token）
-  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2
   # 日期选择
   intl: ^0.19.0
   # 图表

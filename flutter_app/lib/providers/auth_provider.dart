@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../services/api_service.dart' as api;
 
 class AuthProvider extends ChangeNotifier {
   final ApiService _api;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  static const String _tokenKey = 'auth_token';
+  static const String _usernameKey = 'username';
+  static const String _userIdKey = 'user_id';
 
+  late SharedPreferences _prefs;
   User? _user;
   String? _token;
   bool _loading = false;
   String? _error;
+  bool _initialized = false;
 
   User? get user => _user;
   String? get token => _token;
@@ -20,10 +24,18 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider(this._api);
 
+  Future<void> _ensureInit() async {
+    if (!_initialized) {
+      _prefs = await SharedPreferences.getInstance();
+      _initialized = true;
+    }
+  }
+
   Future<void> tryAutoLogin() async {
-    final token = await _storage.read(key: 'auth_token');
-    final username = await _storage.read(key: 'username');
-    final userId = await _storage.read(key: 'user_id');
+    await _ensureInit();
+    final token = _prefs.getString(_tokenKey);
+    final username = _prefs.getString(_usernameKey);
+    final userId = _prefs.getString(_userIdKey);
     if (token != null && username != null && userId != null) {
       _token = token;
       _user = User(id: userId, username: username);
@@ -33,6 +45,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> login(String username, String password) async {
+    await _ensureInit();
     _loading = true;
     _error = null;
     notifyListeners();
@@ -43,9 +56,9 @@ class AuthProvider extends ChangeNotifier {
       _user = User.fromJson(data['user']);
       _api.setToken(_token);
 
-      await _storage.write(key: 'auth_token', value: _token!);
-      await _storage.write(key: 'username', value: _user!.username);
-      await _storage.write(key: 'user_id', value: _user!.id);
+      await _prefs.setString(_tokenKey, _token!);
+      await _prefs.setString(_usernameKey, _user!.username);
+      await _prefs.setString(_userIdKey, _user!.id);
 
       _loading = false;
       notifyListeners();
@@ -59,6 +72,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> register(String username, String password) async {
+    await _ensureInit();
     _loading = true;
     _error = null;
     notifyListeners();
@@ -69,9 +83,9 @@ class AuthProvider extends ChangeNotifier {
       _user = User.fromJson(data['user']);
       _api.setToken(_token);
 
-      await _storage.write(key: 'auth_token', value: _token!);
-      await _storage.write(key: 'username', value: _user!.username);
-      await _storage.write(key: 'user_id', value: _user!.id);
+      await _prefs.setString(_tokenKey, _token!);
+      await _prefs.setString(_usernameKey, _user!.username);
+      await _prefs.setString(_userIdKey, _user!.id);
 
       _loading = false;
       notifyListeners();
@@ -85,10 +99,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    await _ensureInit();
     _user = null;
     _token = null;
     _api.setToken(null);
-    await _storage.deleteAll();
+    await _prefs.remove(_tokenKey);
+    await _prefs.remove(_usernameKey);
+    await _prefs.remove(_userIdKey);
     notifyListeners();
   }
 
