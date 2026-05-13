@@ -1,0 +1,49 @@
+name: accounting_app
+description: 清新记账 App - 清爽蓝风格
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  # 网络请求
+  http: ^1.2.0
+  # 状态管理
+  provider: ^6.1.1
+  # 本地存储
+  sqflite: ^2.3.0
+  path: ^1.9.0
+  # 本地加密存储（token）
+  flutter_secure_storage: ^9.0.0
+  # 日期选择
+  intl: ^0.19.0
+  # 图表
+  fl_chart: ^0.66.0
+  # 文件选择（导入）
+  file_picker: ^6.1.1
+  # 权限
+  permission_handler: ^11.1.0
+  # 分享/导出
+  share_plus: ^7.2.1
+  # 路径
+  path_provider: ^2.1.1
+  # 启动页
+  flutter_native_splash: ^2.3.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: NotoSansSC
+      fonts:
+        - asset: assets/fonts/NotoSansSC-Regular.ttf
+        - asset: assets/fonts/NotoSansSC-Bold.ttf
+          weight: 700

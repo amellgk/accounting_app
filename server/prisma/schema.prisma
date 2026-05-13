@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String        @unique
+  passwordHash String        @map("password_hash")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  categories   Category[]
+  transactions Transaction[]
+  importRecords ImportRecord[]
+
+  @@map("users")
+}
+
+model Category {
+  id         String        @id @default(uuid())
+  userId     String?        @map("user_id")
+  user       User?         @relation(fields: [userId], references: [id])
+  name       String
+  icon       String        @default("📦")
+  type       String        // "income" or "expense"
+  sortOrder  Int           @default(0) @map("sort_order")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  transactions Transaction[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  user            User     @relation(fields: [userId], references: [id])
+  categoryId      String   @map("category_id")
+  category        Category @relation(fields: [categoryId], references: [id])
+  type            String   // "income" or "expense"
+  amount          Float
+  note            String   @default("")
+  transactionDate DateTime @map("transaction_date")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  syncVersion     Int      @default(1) @map("sync_version")
+
+  @@map("transactions")
+}
+
+model ImportRecord {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  user          User     @relation(fields: [userId], references: [id])
+  source        String   // "alipay" or "wechat"
+  fileName      String   @map("file_name")
+  totalCount    Int      @map("total_count")
+  importedCount Int      @map("imported_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("import_records")
+}

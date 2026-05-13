@@ -1,0 +1,32 @@
+# Dependencies
+server/node_modules/
+
+# Environment
+server/.env
+
+# Build outputs
+flutter_app/build/
+flutter_app/.dart_tool/
+flutter_app/.packages
+flutter_app/.flutter-plugins
+flutter_app/.flutter-plugins-dependencies
+server/src/generated/
+
+# Database files
+*.db
+
+# Archives
+*.tar.gz
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
