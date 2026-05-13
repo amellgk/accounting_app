@@ -3,7 +3,7 @@ name: 编译 Android APK
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # 也可以手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,17 +22,41 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.0'
+          channel: 'stable'
 
-      - name: 安装 Flutter 依赖
+      - name: 验证 Flutter 环境
+        run: flutter doctor -v
+
+      - name: 创建标准 Flutter 项目
+        run: |
+          cd /tmp
+          flutter create --org com.accounting --project-name accounting_app temp_app
+          echo "标准项目创建成功"
+
+      - name: 替换为我们的代码
+        run: |
+          # 保留 Android 平台文件
+          rm -rf /tmp/temp_app/lib
+          rm -rf /tmp/temp_app/test
+          rm -f /tmp/temp_app/pubspec.yaml
+          
+          # 复制我们的代码
+          cp -r ${{ github.workspace }}/flutter_app/lib /tmp/temp_app/lib
+          cp ${{ github.workspace }}/flutter_app/pubspec.yaml /tmp/temp_app/pubspec.yaml
+          cp ${{ github.workspace }}/flutter_app/analysis_options.yaml /tmp/temp_app/ 2>/dev/null || true
+          
+          echo "代码替换完成"
+
+      - name: 安装依赖
         run: flutter pub get
-        working-directory: flutter_app
+        working-directory: /tmp/temp_app
 
-      - name: 编译 Release APK
-        run: flutter build apk --release --split-per-abi 2>&1
-        working-directory: flutter_app
+      - name: 编译 APK（纯 debug 版，跳过所有优化）
+        run: flutter build apk --debug
+        working-directory: /tmp/temp_app
 
       - name: 上传 APK
         uses: actions/upload-artifact@v4
         with:
           name: 记账App-APK
-          path: flutter_app/build/app/outputs/flutter-apk/*.apk
+          path: /tmp/temp_app/build/app/outputs/flutter-apk/*.apk
